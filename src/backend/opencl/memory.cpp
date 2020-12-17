@@ -153,6 +153,9 @@ size_t Allocator::getMaxMemorySize(int id) {
 }
 
 void *Allocator::nativeAlloc(const size_t bytes) {
+    if (bytes == 0) {
+        return nullptr;
+    }
     auto ptr = (void *)(new cl::Buffer(getContext(), CL_MEM_READ_WRITE, bytes));
     AF_TRACE("nativeAlloc: {} {}", bytesToString(bytes), ptr);
     return ptr;
@@ -160,7 +163,9 @@ void *Allocator::nativeAlloc(const size_t bytes) {
 
 void Allocator::nativeFree(void *ptr) {
     AF_TRACE("nativeFree:          {}", ptr);
-    delete (cl::Buffer *)ptr;
+    if (!ptr) {
+        delete (cl::Buffer *)ptr;
+    }
 }
 
 AllocatorPinned::AllocatorPinned() : pinnedMaps(opencl::getDeviceCount()) {
